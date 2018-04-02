@@ -6,8 +6,8 @@ spring:
 security:
   oauth2:
     client:
-      clientId: <your client identifier>
-      clientSecret: <your client secret>
+      clientId: ${SECURITY_OAUTH2_CLIENT_CLIENTID}
+      clientSecret: ${SECURITY_OAUTH2_CLIENT_CLIENTSECRET}
       accessTokenUri: https://www.googleapis.com/oauth2/v4/token
       tokenName: oauth_token
       userAuthorizationUri: https://accounts.google.com/o/oauth2/v2/auth
@@ -21,4 +21,5 @@ security:
       preferTokenInfo: true
 # Server configuration
 server:
- port: 8080
+  port: 8080
+  

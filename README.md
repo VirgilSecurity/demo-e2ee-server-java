@@ -14,10 +14,10 @@ Go to [Developer Console](https://console.developers.google.com)
 Register oAuth 2.0 client
 
 ## Configure application
-Edit application.yml in any text editor and set parameters
+Define system variables
 ```
-      clientId: <your client identifier>
-      clientSecret: <your client secret>
+SECURITY_OAUTH2_CLIENT_CLIENTID=<your client identifier>
+SECURITY_OAUTH2_CLIENT_CLIENTSECRET=<your client secret>
 ```
 
 # Authentication
