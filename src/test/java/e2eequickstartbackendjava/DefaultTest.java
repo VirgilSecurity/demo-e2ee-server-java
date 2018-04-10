@@ -33,12 +33,15 @@
 
 package e2eequickstartbackendjava;
 
-import com.gilecode.yagson.YaGson;
-import com.gilecode.yagson.YaGsonBuilder;
-import org.junit.Before;
+import data.model.DefaultUser;
+import data.model.User;
+import data.model.response.UsersResponse;
 import org.junit.Test;
+import util.SerializationUtils;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import static org.junit.Assert.assertEquals;
@@ -56,26 +59,44 @@ import static org.junit.Assert.assertNotNull;
  */
 public class DefaultTest {
 
-    private YaGson mapper;
-
-
-    @Before public void setUp() {
-        mapper = new YaGsonBuilder().setPrettyPrinting().create();
-    }
-
     @Test public void jsonSerialization() {
         Map<String, String> pm = new ConcurrentHashMap<>();
         pm.put("Lol", "M");
         pm.put("Lalka", "F");
 
-        String serializedMap = mapper.toJson(new ArrayList<>(pm.values()), ArrayList.class);
+        String serializedMap = SerializationUtils.toJson(new ArrayList<>(pm.values()));
         assertNotNull(serializedMap);
 
         System.out.println(serializedMap);
 
-        assertEquals("[\n" +
-                             "  \"F\",\n" +
-                             "  \"M\"\n" +
-                             "]", serializedMap);
+        assertEquals("[ \"F\", \"M\" ]", serializedMap);
+    }
+
+    @Test public void userResponseSerializationJackson() {
+        List<User> users = new ArrayList<>();
+
+        users.add(new DefaultUser("User-1"));
+        users.add(new DefaultUser("User-2"));
+        users.add(new DefaultUser("User-3"));
+        users.add(new DefaultUser("User-4"));
+
+        UsersResponse usersResponse = new UsersResponse(users);
+
+        String serializedResponse = SerializationUtils.toJson(usersResponse);
+
+        System.out.println(serializedResponse);
+
+        assertEquals("{\n" +
+                             "  \"users\" : [ {\n" +
+                             "    \"name\" : \"User-1\"\n" +
+                             "  }, {\n" +
+                             "    \"name\" : \"User-2\"\n" +
+                             "  }, {\n" +
+                             "    \"name\" : \"User-3\"\n" +
+                             "  }, {\n" +
+                             "    \"name\" : \"User-4\"\n" +
+                             "  } ]\n" +
+                             "}",
+                     serializedResponse);
     }
 }

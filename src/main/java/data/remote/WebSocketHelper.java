@@ -33,12 +33,12 @@
 
 package data.remote;
 
-import com.gilecode.yagson.YaGson;
-import com.gilecode.yagson.com.google.gson.Gson;
 import controller.UserSessionsController;
 import data.model.Message;
+import data.model.response.UsersResponse;
 import io.javalin.Javalin;
 import org.eclipse.jetty.websocket.api.Session;
+import util.SerializationUtils;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -68,16 +68,16 @@ public final class WebSocketHelper {
                          .ws("/chat", ws -> {
                              ws.onConnect(session -> {
                                  userSessionsController.addUserSession(session);
-                                 broadcastUserListChanged(userSessionsController.getUserSessions().keySet(),
-                                                          userSessionsController.getUserSessions().values());
+                                 broadcastUserListChanged(userSessionsController.getSessions(),
+                                                          userSessionsController.getUsers());
                              });
                              ws.onClose((session, status, message) -> {
                                  userSessionsController.removeUserSession(session);
-                                 broadcastUserListChanged(userSessionsController.getUserSessions().keySet(),
-                                                          userSessionsController.getUserSessions().values());
+                                 broadcastUserListChanged(userSessionsController.getSessions(),
+                                                          userSessionsController.getUsers());
                              });
                              ws.onMessage((session, messageRaw) -> {
-                                 Message message = new Gson().fromJson(messageRaw, Message.class);
+                                 Message message = SerializationUtils.fromJson(messageRaw, Message.class);
                                  sendDirectMessage(userSessionsController.getUserSession(message.getReceiver()),
                                                    message);
                              });
@@ -105,7 +105,7 @@ public final class WebSocketHelper {
     private void sendDirectMessage(Session receiverSession, Message message) {
         try {
             receiverSession.getRemote()
-                           .sendString(new Gson().toJson(message));
+                           .sendString(SerializationUtils.toJson(message));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -117,7 +117,7 @@ public final class WebSocketHelper {
                 .forEach(session -> {
                     try {
                         session.getRemote().sendString(
-                                new Gson().toJson(message)
+                                SerializationUtils.toJson(message)
                         );
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -125,14 +125,13 @@ public final class WebSocketHelper {
                 });
     }
 
-    private void broadcastUserListChanged(final Collection<Session> sessions, final Collection<String> messageBodies) {
+    private void broadcastUserListChanged(final Collection<Session> sessions, final UsersResponse usersResponse) {
         sessions.stream()
                 .filter(Session::isOpen)
                 .forEach(session -> {
                     try {
                         session.getRemote().sendString(
-                                new YaGson().toJson(new ArrayList<>(messageBodies))
-//                                "Hello!"
+                                SerializationUtils.toJson(usersResponse)
                         );
                     } catch (Exception e) {
                         e.printStackTrace();

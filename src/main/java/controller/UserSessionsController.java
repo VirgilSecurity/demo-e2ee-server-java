@@ -33,10 +33,21 @@
 
 package controller;
 
+import data.model.DefaultUser;
+import data.model.response.UsersResponse;
 import org.eclipse.jetty.websocket.api.Session;
 
+import java.util.Collection;
+import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.BiConsumer;
+import java.util.function.BinaryOperator;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * .._  _
@@ -78,7 +89,19 @@ public class UserSessionsController {
         userSessions.remove(session);
     }
 
-    public Map<Session, String> getUserSessions() {
+    public Map<Session, String> getUserSessionsEntries() {
         return userSessions;
+    }
+
+    public Collection<Session> getSessions() {
+        return userSessions.keySet();
+    }
+
+    public UsersResponse getUsers() {
+        return new UsersResponse(userSessions.values()
+                                             .stream()
+                                             .map(DefaultUser::new)
+                                             .collect(Collectors.toList())
+        );
     }
 }
