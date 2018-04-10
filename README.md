@@ -3,8 +3,10 @@ A simple java server application that uses in end-to-end encryption use-case.
 
 # Prerequisites
 
-* Java Development Kit (JDK) 7+
-* Maven 3+
+* Java Development Kit (JDK) 9+
+* Gradle 4.4+
+
+# ! All info below is OUTDATED
 
 # Configuration
 
