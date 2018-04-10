@@ -1,0 +1,24 @@
+group 'com.virgilsecurity'
+version '0.1-SNAPSHOT'
+
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+ext {
+    javalin = '1.5.0'
+    slf4j = '1.7.13'
+    yagson = '0.4'
+}
+
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.12'
+
+    implementation "io.javalin:javalin:$javalin"
+    implementation "org.slf4j:slf4j-simple:$slf4j"
+    implementation "com.gilecode.yagson:yagson:$yagson"
+}
