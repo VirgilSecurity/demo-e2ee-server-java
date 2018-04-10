@@ -35,6 +35,7 @@ package data.remote;
 
 import controller.UserSessionsController;
 import data.model.Message;
+import data.model.request.GetTokenRequest;
 import data.model.response.UsersResponse;
 import io.javalin.Javalin;
 import org.eclipse.jetty.websocket.api.Session;
@@ -83,6 +84,10 @@ public final class WebSocketHelper {
                              });
                          });
 
+        javalin.post("/token", ctx -> {
+
+            ctx.status(200).result("Your token");
+        });
 
         userSessionsController = new UserSessionsController();
     }

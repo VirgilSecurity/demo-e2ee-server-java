@@ -13,6 +13,7 @@ ext {
     javalin = '1.5.0'
     slf4j = '1.7.13'
     jackson = '2.5.3'
+    virgil = '5.0.0'
 }
 
 dependencies {
@@ -25,4 +26,11 @@ dependencies {
     implementation "com.fasterxml.jackson.core:jackson-core:$jackson"
     implementation "com.fasterxml.jackson.core:jackson-annotations:$jackson"
     implementation "com.fasterxml.jackson.core:jackson-databind:$jackson"
+
+    // Virgil SDK
+    implementation "com.virgilsecurity.sdk:crypto:$virgil"
+    implementation "com.virgilsecurity.sdk:sdk:$virgil"
+
+    // Google token verifier
+
 }
