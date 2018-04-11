@@ -33,17 +33,29 @@
 
 package data.remote;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import controller.UserSessionsController;
+import data.model.DefaultMessage;
 import data.model.Message;
+import data.model.NetworkErrorType;
+import data.model.ResponseType;
+import data.model.exception.InitializationException;
 import data.model.request.GetTokenRequest;
+import data.model.response.DefaultResponse;
+import data.model.response.NetworkErrorResponse;
 import data.model.response.UsersResponse;
 import io.javalin.Javalin;
 import org.eclipse.jetty.websocket.api.Session;
 import util.SerializationUtils;
 
+import javax.inject.Inject;
+import javax.inject.Named;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -60,36 +72,14 @@ public final class WebSocketHelper {
 
     private static WebSocketHelper instance;
 
-    private final Javalin javalin;
+    @Inject @Named("clientId") String clientId;
+    @Inject protected VirgilHelper virgilHelper;
+
+    private Javalin javalin;
     private UserSessionsController userSessionsController;
+    private boolean initialized;
 
     private WebSocketHelper() {
-        javalin = Javalin.create()
-                         .port(7070)
-                         .ws("/chat", ws -> {
-                             ws.onConnect(session -> {
-                                 userSessionsController.addUserSession(session);
-                                 broadcastUserListChanged(userSessionsController.getSessions(),
-                                                          userSessionsController.getUsers());
-                             });
-                             ws.onClose((session, status, message) -> {
-                                 userSessionsController.removeUserSession(session);
-                                 broadcastUserListChanged(userSessionsController.getSessions(),
-                                                          userSessionsController.getUsers());
-                             });
-                             ws.onMessage((session, messageRaw) -> {
-                                 Message message = SerializationUtils.fromJson(messageRaw, Message.class);
-                                 sendDirectMessage(userSessionsController.getUserSession(message.getReceiver()),
-                                                   message);
-                             });
-                         });
-
-        javalin.post("/token", ctx -> {
-
-            ctx.status(200).result("Your token");
-        });
-
-        userSessionsController = new UserSessionsController();
     }
 
     public static WebSocketHelper getInstance() {
@@ -99,18 +89,95 @@ public final class WebSocketHelper {
         return instance;
     }
 
-    public Javalin getJavalin() {
-        return javalin;
+    public WebSocketHelper init() {
+
+        javalin = Javalin.create().port(7070);
+
+        initWebSocket();
+        initTokenEndpoint();
+
+        userSessionsController = new UserSessionsController();
+        initialized = true;
+
+        return instance;
     }
 
     public void start() {
-        javalin.start();
+        if (initialized)
+            javalin.start();
+        else
+            throw new InitializationException("WebSocketHelper -> init() method must be called first");
     }
 
-    private void sendDirectMessage(Session receiverSession, Message message) {
+
+    private void initWebSocket() {
+        javalin.ws("/chat", ws -> {
+            ws.onConnect(session -> {
+                userSessionsController.addUserSession(session);
+                DefaultResponse<UsersResponse> response =
+                        new DefaultResponse<>(ResponseType.USERS_LIST,
+                                              new UsersResponse(userSessionsController.getUsers()));
+                broadcastUserListChanged(userSessionsController.getSessions(), response);
+            });
+            ws.onClose((session, status, message) -> {
+                userSessionsController.removeUserSession(session);
+                DefaultResponse<UsersResponse> response =
+                        new DefaultResponse<>(ResponseType.USERS_LIST,
+                                              new UsersResponse(userSessionsController.getUsers()));
+                broadcastUserListChanged(userSessionsController.getSessions(), response);
+            });
+            ws.onMessage((session, messageRaw) -> {
+                Message message = SerializationUtils.fromJson(messageRaw, DefaultMessage.class);
+                DefaultResponse<Message> response =
+                        new DefaultResponse<>(ResponseType.MESSAGE, message);
+                sendDirectMessage(userSessionsController.getUserSession(message.getReceiver()),
+                                  response);
+            });
+        });
+    }
+
+    private void initTokenEndpoint() {
+        javalin.post("/token", ctx -> {
+            GoogleIdTokenVerifier verifier = new GoogleIdTokenVerifier.Builder(new NetHttpTransport(),
+                                                                               new JacksonFactory())
+                    .setAudience(Collections.singletonList(clientId))
+                    .build();
+
+            GetTokenRequest tokenRequest;
+            try {
+                tokenRequest = ctx.bodyAsClass(GetTokenRequest.class);
+            } catch (Exception e) {
+                e.printStackTrace();
+                ctx.status(400)
+                   .result(SerializationUtils.toJson(
+                           new NetworkErrorResponse(NetworkErrorType.GET_TOKEN_REQUEST)
+                   ));
+                return;
+            }
+
+            GoogleIdToken googleIdToken;
+            try {
+                googleIdToken = verifier.verify(tokenRequest.getGoogleToken());
+            } catch (IllegalArgumentException e) {
+                ctx.status(400)
+                   .result(SerializationUtils.toJson(
+                           new NetworkErrorResponse(NetworkErrorType.GOOGLE_TOKEN_VERIFICATION)
+                   ));
+                return;
+            }
+
+            ctx.status(200).result(virgilHelper.generateToken(googleIdToken.getPayload()
+                                                                           .getEmail()
+                                                                           .split("@")[0])
+                                               .stringRepresentation());
+
+        });
+    }
+
+    private void sendDirectMessage(Session receiverSession, DefaultResponse<Message> messageResponse) {
         try {
             receiverSession.getRemote()
-                           .sendString(SerializationUtils.toJson(message));
+                           .sendString(SerializationUtils.toJson(messageResponse));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -130,7 +197,8 @@ public final class WebSocketHelper {
                 });
     }
 
-    private void broadcastUserListChanged(final Collection<Session> sessions, final UsersResponse usersResponse) {
+    private void broadcastUserListChanged(final Collection<Session> sessions,
+                                          final DefaultResponse<UsersResponse> usersResponse) {
         sessions.stream()
                 .filter(Session::isOpen)
                 .forEach(session -> {
@@ -142,5 +210,9 @@ public final class WebSocketHelper {
                         e.printStackTrace();
                     }
                 });
+    }
+
+    public Javalin getJavalin() {
+        return javalin;
     }
 }

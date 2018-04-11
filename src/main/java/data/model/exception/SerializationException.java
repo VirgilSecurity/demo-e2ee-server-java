@@ -10,7 +10,7 @@ package data.model.exception;
  * ...-| | \    at Virgil Security
  * ....|_|-
  */
-public class SerializationException extends RuntimeException {
+public final class SerializationException extends RuntimeException {
 
     public SerializationException() {
     }

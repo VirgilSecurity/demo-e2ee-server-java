@@ -10,7 +10,7 @@ package data.model;
  * ...-| | \    at Virgil Security
  * ....|_|-
  */
-public class DefaultUser implements User {
+public final class DefaultUser implements User {
 
     private final String name;
 

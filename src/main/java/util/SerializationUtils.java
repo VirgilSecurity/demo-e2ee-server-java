@@ -17,7 +17,7 @@ import java.io.IOException;
  * ...-| | \    at Virgil Security
  * ....|_|-
  */
-public class SerializationUtils {
+public final class SerializationUtils {
 
     private static ObjectMapper mapper;
 

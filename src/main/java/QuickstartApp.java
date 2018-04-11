@@ -43,9 +43,11 @@ import data.remote.WebSocketHelper;
  * ...-| | \    at Virgil Security
  * ....|_|-
  */
-public class QuickstartApp {
+public final class QuickstartApp {
 
     public static void main(String[] args) {
-        WebSocketHelper.getInstance().start();
+        WebSocketHelper.getInstance()
+                       .init()
+                       .start();
     }
 }

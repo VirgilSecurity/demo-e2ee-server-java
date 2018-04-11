@@ -33,11 +33,14 @@
 
 package data.model;
 
-public class DefaultMessage implements Message {
+public final class DefaultMessage implements Message {
 
-    private final String sender;
-    private final String receiver;
-    private final String text;
+    private String sender;
+    private String receiver;
+    private String text;
+
+    public DefaultMessage() {
+    }
 
     public DefaultMessage(String sender, String receiver, String text) {
         this.sender = sender;

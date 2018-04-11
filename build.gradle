@@ -1,3 +1,7 @@
+plugins {
+    id "net.ltgt.apt" version "0.10"
+}
+
 group 'com.virgilsecurity'
 version '0.1-SNAPSHOT'
 
@@ -14,6 +18,9 @@ ext {
     slf4j = '1.7.13'
     jackson = '2.5.3'
     virgil = '5.0.0'
+    dagger = '2.15'
+    googleAuth = 'v1-rev139-1.23.0'
+    apacheCommons = '3.7'
 }
 
 dependencies {
@@ -32,5 +39,12 @@ dependencies {
     implementation "com.virgilsecurity.sdk:sdk:$virgil"
 
     // Google token verifier
+    implementation "com.google.apis:google-api-services-oauth2:$googleAuth"
 
+    // Dagger
+    compile "com.google.dagger:dagger:$dagger"
+    apt "com.google.dagger:dagger-compiler:$dagger"
+
+    // Apache commons
+    implementation "org.apache.commons:commons-lang3:$apacheCommons"
 }

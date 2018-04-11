@@ -34,6 +34,7 @@
 package controller;
 
 import data.model.DefaultUser;
+import data.model.User;
 import data.model.response.UsersResponse;
 import org.eclipse.jetty.websocket.api.Session;
 
@@ -59,7 +60,7 @@ import java.util.stream.Collectors;
  * ...-| | \    at Virgil Security
  * ....|_|-
  */
-public class UserSessionsController {
+public final class UserSessionsController {
 
     private static final String USER_PREFIX = "User-";
 
@@ -97,11 +98,10 @@ public class UserSessionsController {
         return userSessions.keySet();
     }
 
-    public UsersResponse getUsers() {
-        return new UsersResponse(userSessions.values()
-                                             .stream()
-                                             .map(DefaultUser::new)
-                                             .collect(Collectors.toList())
-        );
+    public List<User> getUsers() {
+        return userSessions.values()
+                           .stream()
+                           .map(DefaultUser::new)
+                           .collect(Collectors.toList());
     }
 }

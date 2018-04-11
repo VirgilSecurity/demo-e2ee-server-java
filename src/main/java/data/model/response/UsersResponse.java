@@ -14,7 +14,7 @@ import java.util.List;
  * ...-| | \    at Virgil Security
  * ....|_|-
  */
-public class UsersResponse {
+public final class UsersResponse {
 
     private final List<User> users;
 
