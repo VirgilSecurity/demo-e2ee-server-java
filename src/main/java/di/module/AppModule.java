@@ -4,6 +4,7 @@ import dagger.Module;
 import dagger.Provides;
 import util.SystemUtils;
 
+import javax.annotation.Nullable;
 import javax.inject.Named;
 
 /**
@@ -20,7 +21,7 @@ import javax.inject.Named;
 @Module
 public class AppModule {
 
-    @Provides @Named("clientId") String provideClientId() {
+    @Provides @Named("clientId") @Nullable String provideClientId() {
         return SystemUtils.getSystemVariable("clientId");
     }
 }

@@ -47,6 +47,7 @@ import data.model.request.GetTokenRequest;
 import data.model.response.DefaultResponse;
 import data.model.response.NetworkErrorResponse;
 import data.model.response.UsersResponse;
+import di.DaggerManager;
 import io.javalin.Javalin;
 import org.eclipse.jetty.websocket.api.Session;
 import util.SerializationUtils;
@@ -90,7 +91,7 @@ public final class WebSocketHelper {
     }
 
     public WebSocketHelper init() {
-
+        DaggerManager.getInstance().getAppComponent().inject(this);
         javalin = Javalin.create().port(7070);
 
         initWebSocket();

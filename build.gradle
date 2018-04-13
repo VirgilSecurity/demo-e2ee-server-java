@@ -6,6 +6,7 @@ group 'com.virgilsecurity'
 version '0.1-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'idea'
 
 sourceCompatibility = 1.8
 
@@ -42,9 +43,13 @@ dependencies {
     implementation "com.google.apis:google-api-services-oauth2:$googleAuth"
 
     // Dagger
-    compile "com.google.dagger:dagger:$dagger"
+    implementation "com.google.dagger:dagger:$dagger"
     apt "com.google.dagger:dagger-compiler:$dagger"
 
     // Apache commons
     implementation "org.apache.commons:commons-lang3:$apacheCommons"
+}
+
+sourceSets.main {
+    java.srcDirs = ['src/main/java', 'out/production/classes/generated']
 }

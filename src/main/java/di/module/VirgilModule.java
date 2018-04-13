@@ -7,6 +7,7 @@ import dagger.Module;
 import dagger.Provides;
 import util.SystemUtils;
 
+import javax.annotation.Nullable;
 import javax.inject.Named;
 
 /**
@@ -21,17 +22,17 @@ import javax.inject.Named;
  */
 
 @Module
-public final class VirgilModule {
+public class VirgilModule {
 
-    @Provides @Named("apiKey") String provideApiKey() {
+    @Provides @Named("apiKey") @Nullable String provideApiKey() {
         return SystemUtils.getSystemVariable("apiKey");
     }
 
-    @Provides @Named("appId") String provideAppId() {
+    @Provides @Named("appId") @Nullable String provideAppId() {
         return SystemUtils.getSystemVariable("appId");
     }
 
-    @Provides @Named("apiPublicKeyId") String provideApiPublicKey() {
+    @Provides @Named("apiPublicKeyId") @Nullable String provideApiPublicKey() {
         return SystemUtils.getSystemVariable("apiPublicKeyId");
     }
 

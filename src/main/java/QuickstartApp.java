@@ -32,6 +32,7 @@
  */
 
 import data.remote.WebSocketHelper;
+import di.DaggerManager;
 
 /**
  * .._  _
@@ -45,7 +46,10 @@ import data.remote.WebSocketHelper;
  */
 public final class QuickstartApp {
 
+
     public static void main(String[] args) {
+        DaggerManager.getInstance().init();
+
         WebSocketHelper.getInstance()
                        .init()
                        .start();
