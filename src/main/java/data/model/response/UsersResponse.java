@@ -1,5 +1,6 @@
 package data.model.response;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import data.model.User;
 
 import java.util.List;
@@ -16,6 +17,7 @@ import java.util.List;
  */
 public final class UsersResponse {
 
+    @JsonProperty("users")
     private final List<User> users;
 
     public UsersResponse(List<User> users) {

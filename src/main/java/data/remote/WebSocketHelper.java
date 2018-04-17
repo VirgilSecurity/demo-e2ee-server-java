@@ -46,6 +46,7 @@ import data.model.exception.InitializationException;
 import data.model.request.GetTokenRequest;
 import data.model.response.DefaultResponse;
 import data.model.response.NetworkErrorResponse;
+import data.model.response.TokenResponse;
 import data.model.response.UsersResponse;
 import di.DaggerManager;
 import io.javalin.Javalin;
@@ -167,15 +168,17 @@ public final class WebSocketHelper {
                 return;
             }
 
-            ctx.status(200).result(virgilHelper.generateToken(googleIdToken.getPayload()
-                                                                           .getEmail()
-                                                                           .split("@")[0])
-                                               .stringRepresentation());
+            String accessToken = virgilHelper.generateToken(googleIdToken.getPayload()
+                                                                         .getEmail()
+                                                                         .split("@")[0])
+                                             .stringRepresentation();
+
+            ctx.status(200).result(SerializationUtils.toJson(new TokenResponse(accessToken)));
 
         });
     }
 
-    private void sendDirectMessage(Session receiverSession, DefaultResponse<Message> messageResponse) {
+    synchronized private void sendDirectMessage(Session receiverSession, DefaultResponse<Message> messageResponse) {
         try {
             receiverSession.getRemote()
                            .sendString(SerializationUtils.toJson(messageResponse));
@@ -198,7 +201,7 @@ public final class WebSocketHelper {
                 });
     }
 
-    private void broadcastUserListChanged(final Collection<Session> sessions,
+    synchronized private void broadcastUserListChanged(final Collection<Session> sessions,
                                           final DefaultResponse<UsersResponse> usersResponse) {
         sessions.stream()
                 .filter(Session::isOpen)

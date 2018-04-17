@@ -30,6 +30,7 @@ public final class VirgilHelper {
     private final String apiKey;
     private final String appId;
     private final String apiPublicKeyId;
+    private final PrivateKey privateKey;
     private final VirgilCrypto virgilCrypto;
     private final AccessTokenSigner accessTokenSigner;
 
@@ -48,7 +49,6 @@ public final class VirgilHelper {
         this.virgilCrypto = virgilCrypto;
         this.accessTokenSigner = accessTokenSigner;
 
-        PrivateKey privateKey;
         try {
             privateKey = virgilCrypto.importPrivateKey(ConvertionUtils.base64ToBytes(apiKey));
         } catch (CryptoException e) {
@@ -56,6 +56,9 @@ public final class VirgilHelper {
             throw new VirgilSecurityException("VirgilHelper -> private key import error");
         }
 
+    }
+
+    public AccessToken generateToken(String identity) {
         TimeSpan timeSpan = TimeSpan.fromTime(5, TimeUnit.MINUTES);
 
         jwtGenerator = new JwtGenerator(appId,
@@ -63,9 +66,7 @@ public final class VirgilHelper {
                                         apiPublicKeyId,
                                         timeSpan,
                                         accessTokenSigner);
-    }
 
-    public AccessToken generateToken(String identity) {
         try {
             return jwtGenerator.generateToken(identity);
         } catch (CryptoException e) {
